@@ -1,63 +1,64 @@
-// AllRecommendationsScreen.js
 import React from "react";
 import {
   View,
   Text,
   Image,
-  ScrollView,
+  FlatList,
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
 import restaurants from "../items/resturants";
+import ROUTE from "../navigation";
 
 const AllRecommendationsScreen = ({ navigation }) => {
+  const renderItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.recommendedItem}
+      onPress={() =>
+        navigation.navigate(ROUTE.HOME.RESTURANTDETAILS, { restaurant: item })
+      }
+    >
+      <Image source={{ uri: item.image }} style={styles.foodImage} />
+      <View style={styles.foodInfo}>
+        <Text style={styles.foodName}>{item.name}</Text>
+        <Text style={styles.foodName}>{item.deliveryTime}</Text>
+        <Text>{item.rating}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
   return (
-    <ScrollView style={styles.container}>
-      {restaurants.map((item) => (
-        <TouchableOpacity
-          key={item.name}
-          style={styles.recommendedItem}
-          onPress={() =>
-            navigation.navigate("RestaurantDetails", { restaurant: item })
-          }
-        >
-          <View key={item.name} style={styles.recommendedItem}>
-            <Image source={{ uri: item.image }} style={styles.foodImage} />
-            <View style={styles.foodInfo}>
-              <Text style={styles.foodName}>{item.name}</Text>
-              <Text style={styles.foodName}>{item.deliveryTime}</Text>
-              <Text>{item.rating}</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
-      ))}
-    </ScrollView>
+    <FlatList
+      data={restaurants}
+      renderItem={renderItem}
+      keyExtractor={(item) => item.name}
+      contentContainerStyle={styles.container}
+    />
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, // Corrected: Removed quotes
+    padding: 20,
     backgroundColor: "#fff",
-    padding: 20, // Corrected: Removed quotes
   },
   recommendedItem: {
-    width: "100%", // Percentage can remain as a string
+    width: "100%",
     backgroundColor: "#f8f8f8",
-    borderRadius: 10, // Corrected: Removed quotes
+    borderRadius: 10,
     overflow: "hidden",
-    marginBottom: 20, // Corrected: Removed quotes
+    marginBottom: 20,
   },
   foodImage: {
-    width: "100%", // Percentage can remain as a string
-    height: 120, // Corrected: Removed quotes
+    width: "100%",
+    height: 120,
   },
   foodInfo: {
-    paddingHorizontal: 10, // Corrected: Removed quotes
-    paddingVertical: 5, // Corrected: Removed quotes
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
   foodName: {
-    fontSize: 16, // Corrected: Removed quotes
+    fontSize: 16,
     fontWeight: "bold",
   },
 });

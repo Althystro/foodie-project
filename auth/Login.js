@@ -1,13 +1,23 @@
+import { createStackNavigator } from "@react-navigation/stack";
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
+import ROUTE from "../navigation";
 
-const Login = () => {
+const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = () => {
     console.log("Login Info:", { email, password });
   };
+  const Stack = createStackNavigator();
 
   return (
     <View style={styles.container}>
@@ -27,6 +37,10 @@ const Login = () => {
         secureTextEntry
       />
       <Button title="Login" onPress={handleLogin} />
+
+      <TouchableOpacity onPress={() => navigation.navigate(ROUTE.AUTH.SIGNUP)}>
+        <Text style={styles.clickableText}>Register</Text>
+      </TouchableOpacity>
     </View>
   );
 };

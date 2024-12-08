@@ -1,4 +1,3 @@
-// App.js
 import { createStackNavigator } from "@react-navigation/stack";
 import React from "react";
 import HomeScreen from "./components/HomeScreen";
@@ -7,13 +6,31 @@ import { NavigationContainer } from "@react-navigation/native";
 import RestaurantDetailsScreen from "./components/RestaurantDetailsScreen";
 import FoodDetail from "./components/FoodDetail";
 import Basket from "./components/Basket";
+import { TouchableOpacity } from "react-native";
+import { Icon } from "react-native-elements";
+import HomeNav from "./navigation/Home/HomeNav";
+import MainNav from "./navigation/MainNav/MainNav";
 
 const Stack = createStackNavigator();
 
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <MainNav />
+      {/* <Stack.Navigator
+        initialRouteName="Home"
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: "#fff",
+            shadowColor: "transparent", // Remove shadow on iOS
+            // elevation: 0, // Remove shadow on Android
+          },
+          headerTintColor: "#000",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      >
         <Stack.Screen
           name="Home"
           component={HomeScreen}
@@ -22,52 +39,74 @@ const App = () => {
         <Stack.Screen
           name="AllRecommendations"
           component={AllRecommendationsScreen}
-          options={{ title: "All Recommendations" }}
+          options={({ navigation }) => ({
+            title: "All Restaurants",
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => navigation.goBack()}>
+                <Icon
+                  name="arrow-back"
+                  size={24}
+                  color="#000"
+                  style={{ marginLeft: 15 }}
+                />
+              </TouchableOpacity>
+            ),
+          })}
         />
         <Stack.Screen
           name="RestaurantDetails"
           component={RestaurantDetailsScreen}
-          options={{ title: "Menu" }}
+          options={({ navigation }) => ({
+            title: "Menu",
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => navigation.goBack()}>
+                <Icon
+                  name="arrow-back"
+                  size={24}
+                  color="#000"
+                  style={{ marginLeft: 15 }}
+                />
+              </TouchableOpacity>
+            ),
+          })}
         />
         <Stack.Screen
           name="FoodDetails"
           component={FoodDetail}
-          options={{ title: "Details" }}
+          options={({ navigation }) => ({
+            title: "Details",
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => navigation.goBack()}>
+                <Icon
+                  name="arrow-back"
+                  size={24}
+                  color="#000"
+                  style={{ marginLeft: 15 }}
+                />
+              </TouchableOpacity>
+            ),
+          })}
         />
         <Stack.Screen
           name="Basket"
           component={Basket}
-          options={{ title: "Basket" }}
+          options={({ navigation }) => ({
+            title: "Basket",
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => navigation.goBack()}>
+                <Icon
+                  name="arrow-back"
+                  size={24}
+                  color="#000"
+                  style={{ marginLeft: 15 }}
+                />
+              </TouchableOpacity>
+            ),
+          })}
         />
-      </Stack.Navigator>
+      </Stack.Navigator> */}
     </NavigationContainer>
   );
 };
 
 export default App;
-
-// import { StatusBar } from "expo-status-bar";
-// import { SafeAreaView, StyleSheet, Text, View } from "react-native";
-// import SignUp from "./components/Signin";
-// import Login from "./components/Login";
-// import HomeScreen from "./components/HomeScreen";
-
-// export default function App() {
-//   return (
-//     <SafeAreaView style={styles.container}>
-//       {/* <SignUp /> */}
-//       {/* <Login /> */}
-//       <HomeScreen />
-//       <StatusBar style="auto" />
-//     </SafeAreaView>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: "#fff",
-//     alignItems: "center",
-//     justifyContent: "center",
-//   },
-// });

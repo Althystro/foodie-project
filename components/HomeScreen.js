@@ -16,6 +16,7 @@ import restaurantCategories from "../items/restaurantCategories";
 import restaurants from "../items/resturants";
 import { Icon } from "react-native-elements";
 import { FlatList } from "react-native-gesture-handler";
+import ROUTE from "../navigation";
 
 const HomeScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = React.useState(false);
@@ -60,7 +61,7 @@ const HomeScreen = ({ navigation }) => {
           </View>
           <TouchableOpacity
             style={styles.cartButton}
-            onPress={() => navigation.navigate("Basket")}
+            onPress={() => navigation.navigate(ROUTE.HOME.BASKET)}
           >
             <Ionicons name="cart-outline" size={24} color="black" />
           </TouchableOpacity>
@@ -93,7 +94,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.recommendedHeader}>
           <Text style={styles.subHeader}>Recommended For You</Text>
           <TouchableOpacity
-            onPress={() => navigation.navigate("AllRecommendations")}
+            onPress={() => navigation.navigate(ROUTE.HOME.ALLRECOMMENDATIONS)}
           >
             <Text style={styles.seeAll}>See All</Text>
           </TouchableOpacity>
@@ -109,7 +110,7 @@ const HomeScreen = ({ navigation }) => {
                 key={item.name}
                 style={styles.recommendedItem}
                 onPress={() =>
-                  navigation.navigate("RestaurantDetails", {
+                  navigation.navigate(ROUTE.HOME.RESTURANTDETAILS, {
                     restaurant: item,
                   })
                 }
