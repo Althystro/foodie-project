@@ -43,4 +43,10 @@ const register = async (userInfo) => {
   return res.data;
 };
 
-export { login, register };
+const getMyProfile = async () => {
+  const { data } = await instance.get("/auth/profile");
+  console.log(data);
+  return data;
+};
+
+export { login, register, getMyProfile };

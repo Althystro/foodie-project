@@ -1,5 +1,5 @@
 // HomeScreen.js
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -14,27 +14,47 @@ import {
   Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import restaurantCategories from "../items/restaurantCategories";
-import restaurants from "../items/resturants";
 import ROUTE from "../navigation";
 import { deleteToken } from "../api/storage";
 import { useBasket } from "../context/BasketContext";
+import * as Font from "expo-font";
+import { useQuery } from "@tanstack/react-query";
+import { getAllCategories, getAllResturants } from "../api/resturants";
 
 const HomeScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const { getItemCount } = useBasket();
   const [loading, setLoading] = useState(true);
+  const [fontsLoaded, setFontsLoaded] = useState(false);
   const fadeAnim = new Animated.Value(0.3);
   const slideAnim = new Animated.Value(-100);
+  const basketCount = getItemCount();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  const { data: restaurants, isLoading: isLoadingRestaurants } = useQuery({
+    queryKey: ["restaurants"],
+    queryFn: getAllResturants,
+  });
+  const { data: categories, isLoading: isLoadingCategories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: getAllCategories,
+  });
 
   useEffect(() => {
-    // Simulate loading time
+    async function loadFonts() {
+      await Font.loadAsync({
+        Righteous: require("../assets/fonts/Righteous-Regular.ttf"),
+      });
+      setFontsLoaded(true);
+    }
+
+    loadFonts();
     setTimeout(() => {
       setLoading(false);
     }, 1500);
 
-    // Start the combined animations
     Animated.loop(
       Animated.parallel([
         // Fade animation
@@ -67,6 +87,32 @@ const HomeScreen = ({ navigation }) => {
     ).start();
   }, []);
 
+  // Add debounce effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300); // 300ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Memoize filtered restaurants
+  const filteredRestaurants = useMemo(() => {
+    if (!restaurants) return [];
+
+    return restaurants.filter((restaurant) => {
+      const matchesCategory = selectedCategory
+        ? restaurant.category === selectedCategory
+        : true;
+
+      const matchesSearch = restaurant.name
+        .toLowerCase()
+        .includes(debouncedSearch.toLowerCase());
+
+      return matchesCategory && matchesSearch;
+    });
+  }, [selectedCategory, debouncedSearch, restaurants]);
+
   const RestaurantSkeleton = () => (
     <Animated.View
       style={[
@@ -86,13 +132,6 @@ const HomeScreen = ({ navigation }) => {
       </View>
     </Animated.View>
   );
-
-  // Filter restaurants based on selected category
-  const filteredRestaurants = selectedCategory
-    ? restaurants.filter(
-        (restaurant) => restaurant.category === selectedCategory
-      )
-    : restaurants;
 
   // Pull-to-refresh logic
   const onRefresh = useCallback(() => {
@@ -134,7 +173,10 @@ const HomeScreen = ({ navigation }) => {
       style={styles.recommendedItem}
       onPress={() =>
         navigation.navigate(ROUTE.HOME.RESTURANTDETAILS, {
-          restaurant: item,
+          restaurant: {
+            ...item,
+            menuItems: item.items,
+          },
         })
       }
     >
@@ -155,95 +197,130 @@ const HomeScreen = ({ navigation }) => {
     </TouchableOpacity>
   );
 
+  // Update the loading condition to include query loading state
+  const isLoading = loading || isLoadingRestaurants;
+
   return (
-    <ScrollView
+    <FlatList
       style={styles.container}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
-    >
-      <SafeAreaView style={styles.safeArea}>
-        <Text style={styles.header}>Delicious Food,{"\n"}Delivered To You</Text>
+      ListHeaderComponent={() => (
+        <>
+          <SafeAreaView style={styles.safeArea}>
+            <View style={styles.headerContainer}>
+              <Text style={styles.header}>Vroom</Text>
+              <TouchableOpacity
+                onPress={deleteToken}
+                style={styles.logoutButton}
+              >
+                <Ionicons name="log-out-outline" size={24} color="#FF6B6B" />
+              </TouchableOpacity>
+            </View>
 
-        <View style={styles.topContainer}>
-          <View style={styles.searchContainer}>
-            <Ionicons
-              name="search-outline"
-              size={20}
-              color="#666"
-              style={styles.searchIcon}
-            />
-            <TextInput
-              placeholder="Search food, drink, desserts"
-              style={styles.searchInput}
-              placeholderTextColor="#666"
-            />
-            <TouchableOpacity onPress={deleteToken}>
-              <Ionicons
-                name="settings-outline"
-                size={24}
-                color="#666"
-                style={styles.settingsIcon}
-              />
-            </TouchableOpacity>
-          </View>
-          <TouchableOpacity
-            style={styles.cartButton}
-            onPress={() => navigation.navigate(ROUTE.HOME.BASKET)}
-          >
-            <View style={styles.cartIconContainer}>
-              <Ionicons name="cart-outline" size={24} color="#FF6B6B" />
-              {getItemCount() > 0 && (
-                <View style={styles.cartBadge}>
-                  <Text style={styles.cartBadgeText}>{getItemCount()}</Text>
+            <View style={styles.searchBasketContainer}>
+              <View style={styles.searchContainer}>
+                <Ionicons
+                  name="search-outline"
+                  size={20}
+                  color="#666"
+                  style={styles.searchIcon}
+                />
+                <TextInput
+                  placeholder="Search for restaurants..."
+                  style={styles.searchInput}
+                  placeholderTextColor="#999"
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  returnKeyType="search"
+                  clearButtonMode="while-editing"
+                />
+              </View>
+
+              <TouchableOpacity
+                style={styles.cartButton}
+                onPress={() => navigation.navigate(ROUTE.HOME.BASKET)}
+              >
+                <View style={styles.cartIconContainer}>
+                  <Ionicons name="cart-outline" size={24} color="#FF6B6B" />
+                  {basketCount > 0 && (
+                    <View style={styles.cartBadge}>
+                      <Text style={styles.cartBadgeText}>{basketCount}</Text>
+                    </View>
+                  )}
                 </View>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.sectionTitle}>Cuisines</Text>
+            <FlatList
+              data={
+                isLoadingCategories
+                  ? Array(4)
+                      .fill({})
+                      .map((_, index) => ({ id: `skeleton-${index}` }))
+                  : categories
+              }
+              renderItem={({ item }) =>
+                isLoadingCategories ? (
+                  <View style={styles.categoryItem} key={item.id}>
+                    <View
+                      style={[
+                        styles.categoryImageContainer,
+                        { backgroundColor: "#e0e0e0" },
+                      ]}
+                    />
+                    <View
+                      style={{
+                        height: 13,
+                        width: 50,
+                        backgroundColor: "#e0e0e0",
+                        borderRadius: 4,
+                      }}
+                    />
+                  </View>
+                ) : (
+                  <CategoryItem name={item.name} image={item.image} />
+                )
+              }
+              keyExtractor={(item, index) =>
+                isLoadingCategories ? item.id : item._id
+              }
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.categoryList}
+            />
+
+            <View style={styles.recommendedHeader}>
+              <Text style={styles.subHeader}>
+                {selectedCategory
+                  ? `${selectedCategory} Restaurants`
+                  : "Recommended For You"}
+              </Text>
+              {!selectedCategory && (
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.navigate(ROUTE.HOME.ALLRECOMMENDATIONS)
+                  }
+                >
+                  <Text style={styles.seeAll}>See All</Text>
+                </TouchableOpacity>
               )}
             </View>
-          </TouchableOpacity>
-        </View>
-
-        <Text style={styles.sectionTitle}>Cuisines</Text>
-        <FlatList
-          data={restaurantCategories}
-          renderItem={({ item }) => (
-            <CategoryItem name={item.categoryName} image={item.categoryImage} />
-          )}
-          keyExtractor={(item) => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.categoryList}
-        />
-
-        <View style={styles.recommendedHeader}>
-          <Text style={styles.subHeader}>
-            {selectedCategory
-              ? `${selectedCategory} Restaurants`
-              : "Recommended For You"}
-          </Text>
-          {!selectedCategory && (
-            <TouchableOpacity
-              onPress={() => navigation.navigate(ROUTE.HOME.ALLRECOMMENDATIONS)}
-            >
-              <Text style={styles.seeAll}>See All</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        <FlatList
-          data={loading ? Array(3).fill({}) : filteredRestaurants}
-          renderItem={loading ? RestaurantSkeleton : RestaurantItem}
-          keyExtractor={(item, index) =>
-            loading ? index.toString() : item.id.toString()
-          }
-          contentContainerStyle={styles.recommendedList}
-          ListEmptyComponent={() => (
-            <Text style={styles.noResults}>
-              No restaurants found for this cuisine.
-            </Text>
-          )}
-        />
-      </SafeAreaView>
-    </ScrollView>
+          </SafeAreaView>
+        </>
+      )}
+      data={isLoading ? Array(3).fill({}) : filteredRestaurants}
+      renderItem={isLoading ? RestaurantSkeleton : RestaurantItem}
+      keyExtractor={(item, index) => (isLoading ? index : item.id)}
+      contentContainerStyle={styles.recommendedList}
+      ListEmptyComponent={() => (
+        <Text style={styles.noResults}>
+          No restaurants found for this cuisine.
+        </Text>
+      )}
+    />
   );
 };
 
@@ -256,28 +333,42 @@ const styles = StyleSheet.create({
   safeArea: {
     padding: 15,
   },
-  header: {
-    fontSize: 32,
-    fontWeight: "bold",
-    marginBottom: 25,
-    color: "#333",
-    lineHeight: 40,
-  },
-  topContainer: {
+  headerContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 25,
+    paddingTop: 10,
+    paddingRight: 5,
+  },
+  header: {
+    fontSize: 48,
+    fontFamily: "Righteous",
+    color: "#FF6B6B",
+    fontWeight: "bold",
+  },
+  logoutButton: {
+    padding: 8,
+    position: "absolute",
+    right: 0,
+    top: 15,
+  },
+  searchBasketContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+    gap: 10,
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
-    marginRight: 15,
     backgroundColor: "#f5f5f5",
     borderRadius: 12,
     paddingHorizontal: 15,
     height: 50,
+    borderWidth: 1,
+    borderColor: "#eaeaea",
   },
   searchIcon: {
     marginRight: 10,
@@ -294,6 +385,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF0F0",
     padding: 12,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#FFE5E5",
   },
   sectionTitle: {
     fontSize: 24,

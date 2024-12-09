@@ -18,6 +18,9 @@ const RestaurantDetailsScreen = ({ route, navigation }) => {
   const fadeAnim = new Animated.Value(0.3);
   const slideAnim = new Animated.Value(-100);
 
+  const menuItems = restaurant.menuItems || [];
+  const isLoading = loading;
+
   useEffect(() => {
     // Simulate loading time
     setTimeout(() => {
@@ -118,10 +121,10 @@ const RestaurantDetailsScreen = ({ route, navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
-        data={loading ? Array(4).fill({}) : restaurant.menuItems}
-        renderItem={loading ? MenuItemSkeleton : renderItem}
+        data={isLoading ? Array(4).fill({}) : menuItems}
+        renderItem={isLoading ? MenuItemSkeleton : renderItem}
         keyExtractor={(item, index) =>
-          loading ? index.toString() : item.id.toString()
+          isLoading ? index.toString() : item._id.toString()
         }
         ListHeaderComponent={RestaurantHeader}
         showsVerticalScrollIndicator={false}

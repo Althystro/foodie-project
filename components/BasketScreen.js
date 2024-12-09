@@ -26,7 +26,7 @@ const BasketScreen = () => {
       <View style={styles.itemInfo}>
         <Text style={styles.itemName}>{item.name}</Text>
         <Text style={styles.itemPrice}>
-          {(item.price * item.quantity).toFixed(2)} KD
+          ${(item.price * item.quantity).toFixed(2)}
         </Text>
         <View style={styles.quantityContainer}>
           <TouchableOpacity
@@ -75,14 +75,14 @@ const BasketScreen = () => {
       <FlatList
         data={basketItems}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
       />
       <View style={styles.totalContainer}>
         <View style={styles.totalInfo}>
           <Text style={styles.totalItems}>{getItemCount()} items</Text>
           <Text style={styles.totalAmount}>
-            Total: {getBasketTotal().toFixed(2)} KD
+            Total: ${getBasketTotal().toFixed(2)}
           </Text>
         </View>
         <TouchableOpacity style={styles.checkoutButton}>

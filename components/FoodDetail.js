@@ -57,7 +57,7 @@ const FoodDetail = ({ route, navigation }) => {
             <Text style={styles.foodDescription}>{food.description}</Text>
             <View style={styles.priceContainer}>
               <Text style={styles.priceLabel}>Total Price:</Text>
-              <Text style={styles.priceValue}>{totalPrice} KD</Text>
+              <Text style={styles.priceValue}>{totalPrice}$</Text>
             </View>
           </View>
           <View>

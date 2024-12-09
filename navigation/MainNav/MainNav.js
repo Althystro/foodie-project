@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeNav from "../Home/HomeNav";
 import AuthNav from "../AuthNav/AuthNav";
 import Entypo from "@expo/vector-icons/Entypo";
+import MyProfile from "../../auth/MyProfile";
 
 const Tab = createBottomTabNavigator();
 const MainNav = () => {
@@ -26,7 +27,7 @@ const MainNav = () => {
       />
       <Tab.Screen
         name="Auth"
-        component={AuthNav}
+        component={MyProfile}
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
