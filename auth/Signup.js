@@ -15,23 +15,11 @@ import { Icon } from "react-native-elements";
 import UserContext from "../context/UserContext";
 
 const SignUp = () => {
-  const [userInfo, setUserInfo] = useState({
-    username: "",
-    password: "",
-    image: "",
-  });
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const userInfo = { username: username, password: password, image: image };
+  const [image, setImage] = useState(null);
   const [user, setUser] = useContext(UserContext);
-
-  const { mutate } = useMutation({
-    mutationKey: ["register"],
-    mutationFn: () => register(userInfo),
-    onSuccess: () => {
-      setUser(true);
-    },
-    onError: (err) => {
-      console.log(err);
-    },
-  });
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -44,9 +32,20 @@ const SignUp = () => {
     // console.log(result);
 
     if (!result.canceled) {
-      setUserInfo({ ...userInfo, image: result.assets[0].uri });
+      setImage(result.assets[0].uri);
     }
   };
+
+  const { mutate } = useMutation({
+    mutationKey: ["register"],
+    mutationFn: () => register({ username, password, image }),
+    onSuccess: (data) => {
+      setUser(true);
+    },
+    onError: (err) => {
+      console.log(err);
+    },
+  });
 
   const handleSignUp = () => {
     mutate();
@@ -59,18 +58,20 @@ const SignUp = () => {
       <TextInput
         style={styles.input}
         placeholder="username"
-        onChangeText={(value) => setUserInfo({ ...userInfo, username: value })}
+        value={username}
+        onChangeText={setUsername}
       />
       <TextInput
         style={styles.input}
         placeholder="Password"
-        onChangeText={(value) => setUserInfo({ ...userInfo, password: value })}
+        value={password}
+        onChangeText={setPassword}
         secureTextEntry
       />
 
       <TouchableOpacity onPress={() => pickImage()}>
         <Image
-          source={{ uri: userInfo.image }}
+          source={{ uri: image }}
           style={{
             height: 170,
             width: 170,

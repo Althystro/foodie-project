@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import restaurantCategories from "../items/restaurantCategories";
 import restaurants from "../items/resturants";
 import ROUTE from "../navigation";
+import { deleteToken } from "../api/storage";
 
 const HomeScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
@@ -84,12 +85,14 @@ const HomeScreen = ({ navigation }) => {
               placeholder="Search food, drink, desserts"
               style={styles.searchInput}
             />
-            <Ionicons
-              name="settings-outline"
-              size={24}
-              color="black"
-              style={{ paddingLeft: 10 }}
-            />
+            <TouchableOpacity onPress={deleteToken()}>
+              <Ionicons
+                name="settings-outline"
+                size={24}
+                color="black"
+                style={{ paddingLeft: 10 }}
+              />
+            </TouchableOpacity>
           </View>
           <TouchableOpacity
             style={styles.cartButton}
@@ -99,7 +102,6 @@ const HomeScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* Categories Section */}
         <Text style={{ fontSize: 25, paddingBottom: 12 }}>Cuisines</Text>
         <FlatList
           data={restaurantCategories}

@@ -13,11 +13,11 @@ import { useMutation } from "@tanstack/react-query";
 import { login } from "../api/auth";
 
 const Login = ({ navigation }) => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const userInfo = {
-    email: email,
+    username: username,
     password: password,
   };
 
@@ -29,7 +29,7 @@ const Login = ({ navigation }) => {
 
   const handleLogin = () => {
     mutate();
-    console.log("Login Info:", { email, password });
+    console.log("Login Info:", { username, password });
   };
   const Stack = createStackNavigator();
 
@@ -38,9 +38,9 @@ const Login = ({ navigation }) => {
       <Text style={styles.heading}>Login</Text>
       <TextInput
         style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
+        placeholder="Username"
+        value={username}
+        onChangeText={setUsername}
         keyboardType="email-address"
       />
       <TextInput
