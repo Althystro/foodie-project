@@ -1,5 +1,5 @@
 import { createStackNavigator } from "@react-navigation/stack";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -11,11 +11,12 @@ import {
 import ROUTE from "../navigation";
 import { useMutation } from "@tanstack/react-query";
 import { login } from "../api/auth";
+import UserContext from "../context/UserContext";
 
 const Login = ({ navigation }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-
+  const [user, setUser] = useContext(UserContext);
   const userInfo = {
     username: username,
     password: password,
@@ -24,7 +25,15 @@ const Login = ({ navigation }) => {
   const { mutate } = useMutation({
     mutationKey: ["login"],
     mutationFn: () => login(userInfo),
-    onSuccess: (data) => {},
+    onSuccess: () => {
+      setUser(true);
+    },
+    onError: () => {
+      Alert.alert(
+        "Login Failed",
+        "Please check your credentials and try again"
+      );
+    },
   });
 
   const handleLogin = () => {

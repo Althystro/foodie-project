@@ -6,23 +6,45 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { Button, Icon } from "react-native-elements";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useBasket } from "../context/BasketContext";
 
-const FoodDetail = ({ route }) => {
-  const { food } = route.params; // Destructure food from route params
-
-  const [quantity, setQuantity] = useState(0);
+const FoodDetail = ({ route, navigation }) => {
+  const { food } = route.params;
+  const [quantity, setQuantity] = useState(1);
+  const { addToBasket } = useBasket();
 
   const increaseQuantity = () => {
     setQuantity(quantity + 1);
   };
 
   const decreaseQuantity = () => {
-    if (quantity > 0) {
+    if (quantity > 1) {
       setQuantity(quantity - 1);
     }
+  };
+
+  const totalPrice = (food.price * quantity).toFixed(2);
+
+  const handleAddToBasket = () => {
+    addToBasket(food, quantity);
+    Alert.alert(
+      "Added to Basket",
+      `${quantity} x ${food.name} added to your basket`,
+      [
+        {
+          text: "Continue Shopping",
+          style: "cancel",
+        },
+        {
+          text: "View Basket",
+          onPress: () => navigation.navigate("Basket"),
+        },
+      ]
+    );
   };
 
   return (
@@ -32,132 +54,125 @@ const FoodDetail = ({ route }) => {
         <View style={styles.detailsContainer}>
           <View>
             <Text style={styles.foodName}>{food.name}</Text>
-            {/* <View style={styles.infoRow}>
-          <Text style={styles.infoText}>Ratings</Text>
-          <Text style={styles.infoText}>Time</Text>
-          <Text style={styles.infoText}>Calories</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoValue}>⭐ 4.8</Text>
-          <Text style={styles.infoValue}>⏱ 12 min</Text>
-          <Text style={styles.infoValue}>🔥 145 kcal</Text>
-        </View> */}
             <Text style={styles.foodDescription}>{food.description}</Text>
-
-            <Text style={{ fontSize: 30, fontWeight: "500" }}>
-              {food.price} KD
-            </Text>
+            <View style={styles.priceContainer}>
+              <Text style={styles.priceLabel}>Total Price:</Text>
+              <Text style={styles.priceValue}>{totalPrice} KD</Text>
+            </View>
           </View>
-          <View style={styles.increment}>
-            <TouchableOpacity onPress={decreaseQuantity} style={styles.buttons}>
-              <Icon name="remove-circle-outline" size={24} color="black" />
-            </TouchableOpacity>
-            <Text style={styles.quantityText}>{quantity}</Text>
-            <TouchableOpacity onPress={increaseQuantity} style={styles.buttons}>
-              <Icon name="add-circle-outline" size={24} color="black" />
-            </TouchableOpacity>
+          <View>
+            <View style={styles.increment}>
+              <TouchableOpacity
+                onPress={decreaseQuantity}
+                style={styles.buttons}
+              >
+                <Icon name="remove-circle-outline" size={30} color="#FF6B6B" />
+              </TouchableOpacity>
+              <Text style={styles.quantityText}>{quantity}</Text>
+              <TouchableOpacity
+                onPress={increaseQuantity}
+                style={styles.buttons}
+              >
+                <Icon name="add-circle-outline" size={30} color="#FF6B6B" />
+              </TouchableOpacity>
+            </View>
+            <Button
+              buttonStyle={styles.button}
+              title={`Add to Basket - ${totalPrice} KD`}
+              onPress={handleAddToBasket}
+            />
           </View>
-          <Button buttonStyle={styles.button} title="Add to Basket" />
         </View>
       </View>
     </View>
   );
 };
 
-export default FoodDetail;
-
 const styles = StyleSheet.create({
-  increment: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  buttons: {
-    marginHorizontal: 5,
-    color: "black",
-  },
-  quantityText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginHorizontal: 10,
-  },
   container: {
     flex: 1,
-    // backgroundColor: "red",
-    height: "100%",
-    width: "100%",
+    backgroundColor: "#fff",
   },
   foodImage: {
     width: "100%",
-    height: 500,
-    // borderRadius: 10,
+    height: 400,
+    resizeMode: "cover",
   },
   detailsContainer: {
     padding: 20,
     backgroundColor: "#fff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    marginTop: -30,
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    marginTop: -25,
     height: "100%",
     width: "100%",
     flexDirection: "column",
     flex: 1,
     justifyContent: "space-between",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: -4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
   },
   foodName: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: "bold",
     marginBottom: 10,
-  },
-  infoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 5,
-  },
-  infoText: {
-    fontSize: 14,
-    color: "#888",
-  },
-  infoValue: {
-    fontSize: 14,
-    fontWeight: "bold",
+    color: "#333",
   },
   foodDescription: {
     fontSize: 16,
     color: "#666",
-    marginVertical: 10,
+    marginVertical: 15,
+    lineHeight: 24,
   },
-  extraContainer: {
-    marginVertical: 10,
-  },
-  extraTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  extraItem: {
+  priceContainer: {
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 5,
+    marginTop: 10,
   },
-  notesContainer: {
-    marginVertical: 10,
+  priceLabel: {
+    fontSize: 18,
+    color: "#666",
+    fontWeight: "500",
   },
-  notesInput: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    height: 40,
-    marginTop: 5,
+  priceValue: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#FF6B6B",
+  },
+  increment: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f8f8f8",
+    borderRadius: 15,
+    padding: 10,
+    marginBottom: 20,
+  },
+  buttons: {
+    marginHorizontal: 15,
+    padding: 5,
+  },
+  quantityText: {
+    fontSize: 24,
+    fontWeight: "600",
+    marginHorizontal: 20,
+    color: "#333",
+    minWidth: 30,
+    textAlign: "center",
   },
   button: {
-    backgroundColor: "orange",
-    borderRadius: 10,
+    backgroundColor: "#FF6B6B",
+    borderRadius: 15,
     paddingVertical: 15,
-    marginTop: 20,
+    marginTop: 10,
   },
 });
+
+export default FoodDetail;

@@ -14,6 +14,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AuthNav from "./navigation/AuthNav/AuthNav";
 import UserContext from "./context/UserContext";
 import { getToken } from "./api/storage";
+import { BasketProvider } from "./context/BasketContext";
 
 const queryClient = new QueryClient();
 
@@ -30,18 +31,11 @@ const App = () => {
     checkToken();
   });
 
-  const renderThisScreen = () => {
-    if (user) {
-      return <MainNav />;
-    } else {
-      return <AuthNav />;
-    }
-  };
   return (
     <NavigationContainer>
       <QueryClientProvider client={queryClient}>
         <UserContext.Provider value={[user, setUser]}>
-          {user ? <MainNav /> : <AuthNav />}
+          <BasketProvider>{user ? <MainNav /> : <AuthNav />}</BasketProvider>
         </UserContext.Provider>
       </QueryClientProvider>
     </NavigationContainer>

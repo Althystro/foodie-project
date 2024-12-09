@@ -4,7 +4,7 @@ import HomeScreen from "../../components/HomeScreen";
 import AllRecommendationsScreen from "../../components/AllRecommendationsScreen";
 import RestaurantDetailsScreen from "../../components/RestaurantDetailsScreen";
 import FoodDetail from "../../components/FoodDetail";
-import Basket from "../../components/Basket";
+import BasketScreen from "../../components/BasketScreen";
 import { createStackNavigator } from "@react-navigation/stack";
 import { Icon } from "react-native-elements";
 
@@ -82,9 +82,9 @@ const HomeNav = () => {
       />
       <Stack.Screen
         name="Basket"
-        component={Basket}
+        component={BasketScreen}
         options={({ navigation }) => ({
-          title: "Basket",
+          title: "My Basket",
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Icon

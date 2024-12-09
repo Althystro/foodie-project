@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getToken } from "./storage";
 const instance = axios.create({
   baseURL: "https://react-native-food-delivery-be.eapi.joincoded.com/api",
 });
