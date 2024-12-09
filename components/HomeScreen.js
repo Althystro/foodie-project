@@ -1,5 +1,5 @@
 // HomeScreen.js
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   SafeAreaView,
   RefreshControl,
   FlatList,
+  Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import restaurantCategories from "../items/restaurantCategories";
@@ -23,6 +24,68 @@ const HomeScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const { getItemCount } = useBasket();
+  const [loading, setLoading] = useState(true);
+  const fadeAnim = new Animated.Value(0.3);
+  const slideAnim = new Animated.Value(-100);
+
+  useEffect(() => {
+    // Simulate loading time
+    setTimeout(() => {
+      setLoading(false);
+    }, 1500);
+
+    // Start the combined animations
+    Animated.loop(
+      Animated.parallel([
+        // Fade animation
+        Animated.sequence([
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(fadeAnim, {
+            toValue: 0.3,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ]),
+        // Slide animation from left
+        Animated.sequence([
+          Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(slideAnim, {
+            toValue: -100,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ]),
+      ])
+    ).start();
+  }, []);
+
+  const RestaurantSkeleton = () => (
+    <Animated.View
+      style={[
+        styles.recommendedItem,
+        styles.skeletonContainer,
+        {
+          opacity: fadeAnim,
+          transform: [{ translateX: slideAnim }],
+        },
+      ]}
+    >
+      <View style={styles.skeletonImage} />
+      <View style={styles.foodInfo}>
+        <View style={styles.skeletonTitle} />
+        <View style={styles.skeletonRating} />
+        <View style={styles.skeletonDelivery} />
+      </View>
+    </Animated.View>
+  );
 
   // Filter restaurants based on selected category
   const filteredRestaurants = selectedCategory
@@ -152,20 +215,32 @@ const HomeScreen = ({ navigation }) => {
         />
 
         <View style={styles.recommendedHeader}>
-          <Text style={styles.subHeader}>Recommended For You</Text>
-          <TouchableOpacity
-            onPress={() => navigation.navigate(ROUTE.HOME.ALLRECOMMENDATIONS)}
-          >
-            <Text style={styles.seeAll}>See All</Text>
-          </TouchableOpacity>
+          <Text style={styles.subHeader}>
+            {selectedCategory
+              ? `${selectedCategory} Restaurants`
+              : "Recommended For You"}
+          </Text>
+          {!selectedCategory && (
+            <TouchableOpacity
+              onPress={() => navigation.navigate(ROUTE.HOME.ALLRECOMMENDATIONS)}
+            >
+              <Text style={styles.seeAll}>See All</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
-        {/* Recommended List (Vertical Scroll) */}
         <FlatList
-          data={filteredRestaurants}
-          keyExtractor={(item) => item.name}
-          renderItem={({ item }) => <RestaurantItem item={item} />}
+          data={loading ? Array(3).fill({}) : filteredRestaurants}
+          renderItem={loading ? RestaurantSkeleton : RestaurantItem}
+          keyExtractor={(item, index) =>
+            loading ? index.toString() : item.id.toString()
+          }
           contentContainerStyle={styles.recommendedList}
+          ListEmptyComponent={() => (
+            <Text style={styles.noResults}>
+              No restaurants found for this cuisine.
+            </Text>
+          )}
         />
       </SafeAreaView>
     </ScrollView>
@@ -369,6 +444,42 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 12,
     fontWeight: "bold",
+  },
+  skeletonContainer: {
+    backgroundColor: "#f0f0f0",
+  },
+  skeletonImage: {
+    width: "100%",
+    height: 180,
+    backgroundColor: "#e0e0e0",
+    borderRadius: 15,
+  },
+  skeletonTitle: {
+    height: 24,
+    width: "60%",
+    backgroundColor: "#e0e0e0",
+    borderRadius: 4,
+    marginBottom: 12,
+  },
+  skeletonRating: {
+    height: 16,
+    width: "30%",
+    backgroundColor: "#e0e0e0",
+    borderRadius: 4,
+    marginBottom: 8,
+  },
+  skeletonDelivery: {
+    height: 16,
+    width: "40%",
+    backgroundColor: "#e0e0e0",
+    borderRadius: 4,
+  },
+  noResults: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    textAlign: "center",
+    marginTop: 20,
   },
 });
 

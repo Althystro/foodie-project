@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,12 +7,77 @@ import {
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
+  Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import ROUTE from "../navigation";
 
 const RestaurantDetailsScreen = ({ route, navigation }) => {
   const { restaurant } = route.params;
+  const [loading, setLoading] = useState(true);
+  const fadeAnim = new Animated.Value(0.3);
+  const slideAnim = new Animated.Value(-100);
+
+  useEffect(() => {
+    // Simulate loading time
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+
+    // Start the combined animations
+    Animated.loop(
+      Animated.parallel([
+        // Fade animation
+        Animated.sequence([
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(fadeAnim, {
+            toValue: 0.3,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ]),
+        // Slide animation from left
+        Animated.sequence([
+          Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(slideAnim, {
+            toValue: -100,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ]),
+      ])
+    ).start();
+  }, []);
+
+  const MenuItemSkeleton = () => (
+    <Animated.View
+      style={[
+        styles.menuItemContainer,
+        styles.skeletonContainer,
+        {
+          opacity: fadeAnim,
+          transform: [{ translateX: slideAnim }],
+        },
+      ]}
+    >
+      <View style={styles.menuItem}>
+        <View style={styles.menuInfo}>
+          <View style={styles.skeletonTitle} />
+          <View style={styles.skeletonDescription} />
+          <View style={styles.skeletonPrice} />
+        </View>
+        <View style={[styles.imageContainer, styles.skeletonImage]} />
+      </View>
+    </Animated.View>
+  );
 
   const RestaurantHeader = () => (
     <View style={styles.headerContainer}>
@@ -53,9 +118,11 @@ const RestaurantDetailsScreen = ({ route, navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
-        data={restaurant.menuItems}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
+        data={loading ? Array(4).fill({}) : restaurant.menuItems}
+        renderItem={loading ? MenuItemSkeleton : renderItem}
+        keyExtractor={(item, index) =>
+          loading ? index.toString() : item.id.toString()
+        }
         ListHeaderComponent={RestaurantHeader}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContainer}
@@ -170,6 +237,34 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#FF6B6B",
+  },
+  skeletonContainer: {
+    backgroundColor: "#f0f0f0",
+  },
+  skeletonTitle: {
+    height: 20,
+    width: "70%",
+    backgroundColor: "#e0e0e0",
+    borderRadius: 4,
+    marginBottom: 12,
+  },
+  skeletonDescription: {
+    height: 16,
+    width: "90%",
+    backgroundColor: "#e0e0e0",
+    borderRadius: 4,
+    marginBottom: 12,
+  },
+  skeletonPrice: {
+    height: 16,
+    width: "30%",
+    backgroundColor: "#e0e0e0",
+    borderRadius: 4,
+  },
+  skeletonImage: {
+    backgroundColor: "#e0e0e0",
+    width: 100,
+    height: 100,
   },
 });
 
