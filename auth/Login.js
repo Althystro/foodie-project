@@ -9,12 +9,26 @@ import {
   TouchableOpacity,
 } from "react-native";
 import ROUTE from "../navigation";
+import { useMutation } from "@tanstack/react-query";
+import { login } from "../api/auth";
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const userInfo = {
+    email: email,
+    password: password,
+  };
+
+  const { mutate } = useMutation({
+    mutationKey: ["login"],
+    mutationFn: () => login(userInfo),
+    onSuccess: (data) => {},
+  });
+
   const handleLogin = () => {
+    mutate();
     console.log("Login Info:", { email, password });
   };
   const Stack = createStackNavigator();
