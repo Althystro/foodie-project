@@ -4,7 +4,7 @@ import { getToken } from "./storage";
 const BASE_URL = "https://react-native-food-delivery-be.eapi.joincoded.com/api";
 
 const instance = axios.create({
-  baseURL: BASE_URL,
+  baseURL: "https://react-native-food-delivery-be.eapi.joincoded.com/api",
 });
 instance.interceptors.request.use(async (config) => {
   const token = await getToken();
@@ -14,4 +14,4 @@ instance.interceptors.request.use(async (config) => {
   return config;
 });
 
-export default { instance, BASE_URL };
+export default instance;

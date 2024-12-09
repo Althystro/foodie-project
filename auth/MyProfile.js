@@ -37,7 +37,7 @@ const MyProfile = () => {
       <View style={styles.profileCard}>
         <Image
           source={{
-            uri: `${BASE_URL}/${userInfo?.image}`,
+            uri: `https://react-native-food-delivery-be.eapi.joincoded.com/api/${userInfo?.image}`,
           }}
           style={styles.profileImage}
         />

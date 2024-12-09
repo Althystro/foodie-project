@@ -45,7 +45,6 @@ const register = async (userInfo) => {
 
 const getMyProfile = async () => {
   const { data } = await instance.get("/auth/profile");
-  console.log(data);
   return data;
 };
 
