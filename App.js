@@ -15,6 +15,7 @@ import AuthNav from "./navigation/AuthNav/AuthNav";
 import UserContext from "./context/UserContext";
 import { getToken } from "./api/storage";
 import { BasketProvider } from "./context/BasketContext";
+import * as Font from "expo-font";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,17 @@ const App = () => {
   useEffect(() => {
     checkToken();
   });
+
+  useEffect(() => {
+    async function loadFonts() {
+      await Font.loadAsync({
+        "Righteous-Regular": require("./assets/fonts/Righteous-Regular.ttf"),
+        // Add other fonts here
+      });
+    }
+
+    loadFonts();
+  }, []);
 
   return (
     <NavigationContainer>

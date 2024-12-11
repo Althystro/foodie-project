@@ -57,7 +57,7 @@ const FoodDetail = ({ route, navigation }) => {
             <Text style={styles.foodDescription}>{food.description}</Text>
             <View style={styles.priceContainer}>
               <Text style={styles.priceLabel}>Total Price:</Text>
-              <Text style={styles.priceValue}>{totalPrice}$</Text>
+              <Text style={styles.priceValue}>${totalPrice}</Text>
             </View>
           </View>
           <View>
@@ -78,7 +78,7 @@ const FoodDetail = ({ route, navigation }) => {
             </View>
             <Button
               buttonStyle={styles.button}
-              title={`Add to Basket - ${totalPrice} KD`}
+              title={`Add to Basket -  $${totalPrice} `}
               onPress={handleAddToBasket}
             />
           </View>

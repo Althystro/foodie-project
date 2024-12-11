@@ -12,12 +12,10 @@ export const BasketProvider = ({ children }) => {
       );
 
       if (existingItemIndex !== -1) {
-        // Update existing item
         const updatedItems = [...prevItems];
         updatedItems[existingItemIndex].quantity += quantity;
         return updatedItems;
       } else {
-        // Add new item
         const basketItem = {
           id: item.id,
           name: item.name,

@@ -1,5 +1,11 @@
 // HomeScreen.js
-import React, { useState, useCallback, useEffect, useMemo } from "react";
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useContext,
+} from "react";
 import {
   View,
   Text,
@@ -20,6 +26,8 @@ import { useBasket } from "../context/BasketContext";
 import * as Font from "expo-font";
 import { useQuery } from "@tanstack/react-query";
 import { getAllCategories, getAllResturants } from "../api/resturants";
+import UserContext from "../context/UserContext";
+import { Alert } from "react-native";
 
 const HomeScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
@@ -32,6 +40,25 @@ const HomeScreen = ({ navigation }) => {
   const basketCount = getItemCount();
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const { user, setUser } = useContext(UserContext);
+
+  const logout = () => {
+    deleteToken();
+    setUser(false);
+  };
+  const handleLogout = () => {
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Logout",
+        onPress: logout,
+        style: "destructive",
+      },
+    ]);
+  };
 
   const { data: restaurants, isLoading: isLoadingRestaurants } = useQuery({
     queryKey: ["restaurants"],
@@ -102,7 +129,7 @@ const HomeScreen = ({ navigation }) => {
 
     return restaurants.filter((restaurant) => {
       const matchesCategory = selectedCategory
-        ? restaurant.category === selectedCategory
+        ? restaurant.category.name === selectedCategory
         : true;
 
       const matchesSearch = restaurant.name
@@ -170,6 +197,7 @@ const HomeScreen = ({ navigation }) => {
   // Updated RestaurantItem component
   const RestaurantItem = ({ item }) => (
     <TouchableOpacity
+      key={item._id}
       style={styles.recommendedItem}
       onPress={() =>
         navigation.navigate(ROUTE.HOME.RESTURANTDETAILS, {
@@ -212,7 +240,7 @@ const HomeScreen = ({ navigation }) => {
             <View style={styles.headerContainer}>
               <Text style={styles.header}>Vroom</Text>
               <TouchableOpacity
-                onPress={deleteToken}
+                onPress={handleLogout}
                 style={styles.logoutButton}
               >
                 <Ionicons name="log-out-outline" size={24} color="#FF6B6B" />
@@ -264,7 +292,7 @@ const HomeScreen = ({ navigation }) => {
               }
               renderItem={({ item }) =>
                 isLoadingCategories ? (
-                  <View style={styles.categoryItem} key={item.id}>
+                  <View style={styles.categoryItem} key={`skeleton-${item.id}`}>
                     <View
                       style={[
                         styles.categoryImageContainer,
@@ -281,11 +309,17 @@ const HomeScreen = ({ navigation }) => {
                     />
                   </View>
                 ) : (
-                  <CategoryItem name={item.name} image={item.image} />
+                  <CategoryItem
+                    name={item.name}
+                    image={item.image}
+                    key={item._id}
+                  />
                 )
               }
-              keyExtractor={(item, index) =>
-                isLoadingCategories ? item.id : item._id
+              keyExtractor={(item) =>
+                isLoadingCategories
+                  ? `skeleton-${item.id}`
+                  : item._id.toString()
               }
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -311,9 +345,23 @@ const HomeScreen = ({ navigation }) => {
           </SafeAreaView>
         </>
       )}
-      data={isLoading ? Array(3).fill({}) : filteredRestaurants}
-      renderItem={isLoading ? RestaurantSkeleton : RestaurantItem}
-      keyExtractor={(item, index) => (isLoading ? index : item.id)}
+      data={
+        isLoading
+          ? Array(3)
+              .fill({})
+              .map((_, index) => ({ id: `skeleton-${index}` }))
+          : filteredRestaurants
+      }
+      renderItem={({ item }) =>
+        isLoading ? (
+          <RestaurantSkeleton key={`skeleton-${item.id}`} />
+        ) : (
+          <RestaurantItem item={item} key={item._id} />
+        )
+      }
+      keyExtractor={(item) =>
+        isLoading ? `skeleton-${item.id}` : item._id.toString()
+      }
       contentContainerStyle={styles.recommendedList}
       ListEmptyComponent={() => (
         <Text style={styles.noResults}>
@@ -340,6 +388,7 @@ const styles = StyleSheet.create({
     marginBottom: 25,
     paddingTop: 10,
     paddingRight: 5,
+    fontFamily: "Righteous",
   },
   header: {
     fontSize: 48,

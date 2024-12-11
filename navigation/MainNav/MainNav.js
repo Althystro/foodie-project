@@ -6,6 +6,9 @@ import AuthNav from "../AuthNav/AuthNav";
 import Entypo from "@expo/vector-icons/Entypo";
 import MyProfile from "../../auth/MyProfile";
 
+import Ionicons from "@expo/vector-icons/Ionicons";
+import ProfileNav from "../ProfileStack";
+
 const Tab = createBottomTabNavigator();
 const MainNav = () => {
   return (
@@ -21,17 +24,17 @@ const MainNav = () => {
         component={HomeNav}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Entypo name="home" size={24} color="black" />
+            <Entypo name="home" size={24} color="FF6B6B" />
           ),
         }}
       />
       <Tab.Screen
         name="Auth"
-        component={MyProfile}
+        component={ProfileNav}
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Entypo name="home" size={24} color="black" />
+            <Ionicons name="person-circle-outline" size={24} color="FF6B6B" />
           ),
         }}
       />

@@ -10,5 +10,9 @@ const ROUTE = {
     LOGIN: "Login",
     SIGNUP: "Sign Up",
   },
+  PROFILE: {
+    PROFILE: "MyProfile",
+    PASTORDERS: "PastOrders",
+  },
 };
 export default ROUTE;

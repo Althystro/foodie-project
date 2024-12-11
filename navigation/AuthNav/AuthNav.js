@@ -32,13 +32,13 @@ const AuthNav = () => {
         name="Sign Up"
         component={SignUp}
         options={({ navigation }) => ({
-          title: "All Restaurants",
+          title: "",
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Icon
                 name="arrow-back"
                 size={24}
-                color="#000"
+                color="#FF6B6B"
                 style={{ marginLeft: 15 }}
               />
             </TouchableOpacity>

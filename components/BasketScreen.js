@@ -21,7 +21,7 @@ const BasketScreen = () => {
   } = useBasket();
 
   const renderItem = ({ item }) => (
-    <View style={styles.basketItem}>
+    <View style={styles.basketItem} key={item.id}>
       <Image source={{ uri: item.image }} style={styles.itemImage} />
       <View style={styles.itemInfo}>
         <Text style={styles.itemName}>{item.name}</Text>
